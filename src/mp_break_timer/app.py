@@ -78,6 +78,8 @@ class Controller(QObject):
         self._overlay.back_to_work_requested.connect(lambda: self._resume_work(time.time()))
         self._overlay.fields_changed.connect(self._on_fields_changed)
         self._warning_pills = CornerPills(click_through=True)
+        self._start_now_pills = CornerPills(click_through=False)
+        self._start_now_pills.clicked.connect(self._start_snoozed_break_now)
         self._disabled_pills = CornerPills(click_through=False)
         self._disabled_pills.clicked.connect(self._enable)
 
@@ -125,9 +127,10 @@ class Controller(QObject):
 
         if self._mode is Mode.WORKING:
             remaining = self._next_break_at - now
+            warning = remaining <= self._cfg.pre_break_warning_sec
             if remaining <= 0:
                 self._start_break(now)
-            elif remaining <= self._cfg.pre_break_warning_sec:
+            elif warning:
                 seconds = math.ceil(remaining)
                 self._warning_pills.show(
                     f"Break in {seconds // 60}:{seconds % 60:02d}",
@@ -135,6 +138,8 @@ class Controller(QObject):
                 )
             else:
                 self._warning_pills.hide()
+            if self._mode is Mode.WORKING and self._snoozed:
+                self._start_now_pills.show("Start break now", row=1 if warning else 0)
         elif self._mode is Mode.BREAK:
             self._update_overlay(now)
         elif self._mode is Mode.DISABLED:
@@ -186,6 +191,7 @@ class Controller(QObject):
         self._mode = Mode.BREAK
         self._break_started_at = now
         self._warning_pills.hide()
+        self._start_now_pills.hide()
         self._overlay.open(self._state.work_start, self._state.big_breaks)
         self._update_overlay(now)
 
@@ -246,6 +252,11 @@ class Controller(QObject):
         self._snoozed = True
         self._next_break_at = time.time() + self._cfg.snooze_min * 60
 
+    def _start_snoozed_break_now(self) -> None:
+        if self._mode is Mode.WORKING and self._snoozed:
+            log.info("Snoozed break started early")
+            self._start_break(time.time())
+
     def _resume_work(self, now: float) -> None:
         if self._overlay.is_open():
             self._overlay.close()
@@ -259,6 +270,7 @@ class Controller(QObject):
         if self._overlay.is_open():
             self._overlay.close()
         self._warning_pills.hide()
+        self._start_now_pills.hide()
         self._mode = Mode.DISABLED
         self._snoozed = False
         self._disabled_since = time.time()

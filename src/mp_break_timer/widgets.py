@@ -180,13 +180,15 @@ class CornerPills(QObject):
 
     clicked = Signal()
     _MARGIN = 16
+    _SPACING = 8
 
     def __init__(self, click_through: bool):
         super().__init__()
         self._click_through = click_through
         self._pills: list[tuple[object, _Pill]] = []
 
-    def show(self, text: str, progress: float | None = None) -> None:
+    def show(self, text: str, progress: float | None = None, row: int = 0) -> None:
+        """row 0 is the bottom-most position; higher rows stack upwards."""
         screens = QGuiApplication.screens()
         if [screen for screen, _ in self._pills] != screens:
             self.hide()
@@ -199,7 +201,7 @@ class CornerPills(QObject):
             area = screen.availableGeometry()
             pill.move(
                 area.right() - pill.width() - self._MARGIN,
-                area.bottom() - pill.height() - self._MARGIN,
+                area.bottom() - pill.height() - self._MARGIN - row * (pill.height() + self._SPACING),
             )
             if not pill.isVisible():
                 pill.show()
