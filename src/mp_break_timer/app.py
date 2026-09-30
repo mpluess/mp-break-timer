@@ -212,12 +212,7 @@ class Controller(QObject):
             else:
                 wrap_up = (f"+{format_hm(-left)} over your limit", True)
 
-        if self._snoozed:
-            snooze_block = "Snooze already used for this break"
-        elif escalated:
-            snooze_block = f"No snoozing after {format_hm(threshold)} work time"
-        else:
-            snooze_block = None
+        snooze_block = "Snooze already used for this break" if self._snoozed else None
 
         work_text = (
             f"Today's work time: {format_hm(work)}"
@@ -242,7 +237,7 @@ class Controller(QObject):
             self._update_overlay(time.time())
 
     def _snooze(self) -> None:
-        if self._mode is not Mode.BREAK or self._snoozed or self._state.escalated:
+        if self._mode is not Mode.BREAK or self._snoozed:
             return
         self._state.snooze_count += 1
         self._state.save()

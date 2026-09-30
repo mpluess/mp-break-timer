@@ -16,7 +16,7 @@ CONFIG_PATH = APP_DIR / "config.toml"
 class Config:
     break_interval_min: float = 27
     break_duration_min: float = 3
-    snooze_min: float = 5
+    snooze_min: float = 3
     hold_seconds: float = 2
     max_work_time_min: float = 300
     wrap_up_before_max_min: float = 15
@@ -34,7 +34,7 @@ _COMMENTS = {
     "max_work_time_min": "Maximum work time per day in minutes (300 = 5 h).",
     "wrap_up_before_max_min": (
         "Minutes before the maximum at which the wrap-up escalation starts (15 -> at 4:45):\n"
-        "# wrap-up message on the break screen, no snoozing, shorter break interval."
+        "# wrap-up message on the break screen, shorter break interval."
     ),
     "escalated_break_interval_min": "Minutes between breaks once the wrap-up escalation has started.",
     "pre_break_warning_sec": "Seconds before a break at which the corner warning appears (0 = no warning).",
