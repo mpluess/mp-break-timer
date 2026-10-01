@@ -1,5 +1,6 @@
 """User configuration, read from config.toml in the app data folder."""
 
+import json
 import logging
 import os
 import tomllib
@@ -24,6 +25,7 @@ class Config:
     pre_break_warning_sec: float = 60
     lock_counts_as_break_min: float = 10
     reenable_after_lock_min: float = 10
+    back_to_work_message: str = "Mind your FEET position and work PACE"
 
 
 _COMMENTS = {
@@ -40,9 +42,10 @@ _COMMENTS = {
     "pre_break_warning_sec": "Seconds before a break at which the corner warning appears (0 = no warning).",
     "lock_counts_as_break_min": "Minutes the laptop must be locked or asleep to count as a break.",
     "reenable_after_lock_min": "Minutes the laptop must be locked or asleep to re-enable disabled breaks.",
+    "back_to_work_message": 'Message shown next to "Back to work" when the break is over ("" = none).',
 }
 
-# Settings for which 0 makes sense; everything else must be positive.
+# Numeric settings for which 0 makes sense; the other numbers must be positive.
 _ZERO_ALLOWED = {"hold_seconds", "wrap_up_before_max_min", "pre_break_warning_sec"}
 
 
@@ -53,7 +56,8 @@ def _default_config_text() -> str:
         "",
     ]
     for field in fields(Config):
-        lines += [f"# {_COMMENTS[field.name]}", f"{field.name} = {field.default:g}", ""]
+        value = json.dumps(field.default) if isinstance(field.default, str) else f"{field.default:g}"
+        lines += [f"# {_COMMENTS[field.name]}", f"{field.name} = {value}", ""]
     return "\n".join(lines)
 
 
@@ -74,10 +78,15 @@ def load_config() -> tuple[Config, str | None]:
     known = {field.name for field in fields(Config)}
     problems = [f"unknown setting '{key}'" for key in data if key not in known]
     values = {}
+    defaults = Config()
     for name in known & data.keys():
         value = data[name]
-        is_number = isinstance(value, (int, float)) and not isinstance(value, bool)
-        if is_number and (value >= 0 if name in _ZERO_ALLOWED else value > 0):
+        if isinstance(getattr(defaults, name), str):
+            valid = isinstance(value, str)
+        else:
+            is_number = isinstance(value, (int, float)) and not isinstance(value, bool)
+            valid = is_number and (value >= 0 if name in _ZERO_ALLOWED else value > 0)
+        if valid:
             values[name] = value
         else:
             problems.append(f"invalid value for '{name}'")

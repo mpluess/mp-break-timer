@@ -14,7 +14,7 @@ For debugging with log output in the console: `uv run python -m mp_break_timer`.
 
 ## Behaviour
 
-- **Break:** 27 min after "Back to work", a full-screen overlay covers all screens and runs down 3 min. Afterwards, "Back to work" appears.
+- **Break:** 27 min after "Back to work", a full-screen overlay covers all screens and runs down 3 min. Afterwards, "Back to work" appears, with a reminder right above it (default: "Mind your FEET position and work PACE", configurable).
 - **Warning:** 60 s before a break, a small click-through pill in the bottom-right corner counts down. It doesn't take focus and isn't a Windows notification, so DND doesn't hide it.
 - **Snooze** ("I need 3 more min"): hold for 2 s. One snooze per break. The break screen shows how often you snoozed today. While snoozed, a "Start break now" pill in the corner lets you start the break early with one click.
 - **Disable** ("Disable (meeting, discussion)"): hold for 2 s. While disabled, the tray icon is red and a pill in the corner shows "Breaks off · N min". Click the pill to re-enable. Breaks are also re-enabled automatically after the laptop was locked or asleep for ≥ 10 min.

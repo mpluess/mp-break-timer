@@ -25,6 +25,7 @@ QLabel#wrapHeadline { font-size: 28pt; font-weight: 700; color: #ffb454; }
 QLabel#wrapDetail { font-size: 22pt; font-weight: 600; }
 QLabel#workTime { font-size: 16pt; font-weight: 600; }
 QLabel#muted { color: #9aa5b4; font-size: 11pt; }
+QLabel#backMessage { font-size: 22pt; font-weight: 600; color: #ffd58a; }
 QLineEdit {
     background: rgba(255, 255, 255, 20); border: 1px solid rgba(255, 255, 255, 70);
     border-radius: 8px; padding: 6px 10px; font-size: 13pt; min-width: 90px; max-width: 110px;
@@ -88,6 +89,10 @@ class _OverlayWindow(QWidget):
         layout.addWidget(self.ring, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addSpacing(8)
 
+        # Right above the button, so it's read while clicking it.
+        self.back_message = _label(config.back_to_work_message, "backMessage")
+        self.back_message.setWordWrap(True)
+        layout.addWidget(self.back_message)
         self.back_button = QPushButton("Back to work")
         self.back_button.setObjectName("backButton")
         self.back_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
@@ -236,6 +241,7 @@ class BreakOverlay(QObject):
 
         main = self._main
         main.back_button.setVisible(done)
+        main.back_message.setVisible(done and bool(self._config.back_to_work_message))
         main.actions.setVisible(not done)
         main.snooze_button.setVisible(snooze_block_reason is None)
         main.snooze_note.setVisible(snooze_block_reason is not None)
